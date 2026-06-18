@@ -11,6 +11,7 @@ services:
       MAXRECORDS: ${MAXRECORDS:-1000}
       MAXNUMBER: ${MAXNUMBER:-5000}
       PORT: ${PORT:-3000}
+      REDIS_URL: ${REDIS_URL:-}
     ports:
       - "3000:3000"
     restart: unless-stopped
@@ -19,6 +20,19 @@ services:
         limits:
           cpus: "0.5"
           memory: 256M
+
+  valkey:
+    profiles:
+      - redis
+    image: valkey/valkey:8-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
 
   demo:
     profiles:

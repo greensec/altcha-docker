@@ -10,6 +10,7 @@ export type ApiConfig = {
   maxNumber: number;
   maxRecords: number;
   port: number;
+  redisUrl?: string;
 };
 
 export type DemoConfig = {
@@ -69,6 +70,8 @@ export const parseApiConfig = (env: Env = process.env): ApiConfig => {
 
   const maxNumberSource = env.MAXNUMBER === undefined || env.MAXNUMBER.trim() === "" ? "COST" : "MAXNUMBER";
 
+  const redisUrl = env.REDIS_URL?.trim();
+
   return {
     algorithm: parseAlgorithm(env.ALGORITHM),
     corsOrigin: parseCorsOrigin(env.CORS_ORIGIN),
@@ -77,6 +80,7 @@ export const parseApiConfig = (env: Env = process.env): ApiConfig => {
     maxNumber: parsePositiveInteger(env, maxNumberSource, 5000),
     maxRecords: parsePositiveInteger(env, "MAXRECORDS", 1000),
     port: parsePositiveInteger(env, "PORT", 3000),
+    redisUrl: redisUrl || undefined,
   };
 };
 
