@@ -16,7 +16,7 @@ export const createDemoApp = (config: DemoConfig): Express => {
     contentSecurityPolicy: {
       useDefaults: true,
       directives: {
-        "script-src": ["'self'", "https://cdn.jsdelivr.net"],
+        "script-src": ["'self'"],
         "connect-src": ["'self'", "blob:"],
         "worker-src": ["'self'", "blob:"],
       },
@@ -24,6 +24,7 @@ export const createDemoApp = (config: DemoConfig): Express => {
   }));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use(express.static(path.join(__dirname, "demo")));
 
   app.get("/", (_req: Request, res: Response) => {
     res.sendFile(path.join(__dirname, "demo/index.html"));
