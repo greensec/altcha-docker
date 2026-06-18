@@ -16,7 +16,7 @@ export const createDemoApp = (config: DemoConfig): Express => {
     contentSecurityPolicy: {
       useDefaults: true,
       directives: {
-        "script-src": ["'self'", "'sha256-ZswfTY7H35rbv8WC7NXBoiC7WNu86vSzCDChNWwZZDM='"],
+        "script-src": ["'self'", "'unsafe-eval'", "'sha256-ZswfTY7H35rbv8WC7NXBoiC7WNu86vSzCDChNWwZZDM='"],
         "connect-src": ["'self'", "blob:"],
         "worker-src": ["'self'", "blob:"],
       },
