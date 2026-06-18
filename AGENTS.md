@@ -61,9 +61,10 @@
 
 ## CI/CD
 
-- GitHub Actions: `.github/workflows/docker-publish.yml` builds multi-arch images (amd64/arm64) with Buildx/QEMU.
-- Publishes to GHCR `ghcr.io/<owner>/<repo>` on pushes to `main` and version tags `v*.*.*`.
-- Uses `docker/metadata-action` for tags/labels; caches via GHA cache.
+- GitHub Actions: `.github/workflows/cicd.yml` runs tests on PRs and builds + publishes multi-arch images (amd64/arm64) on pushes to `main` and version tags `v*.*.*`.
+- The `test` job runs `bun install`, `bun run build`, and `bun test` inside an `oven/bun` container on every PR.
+- The `build` job uses Buildx/QEMU, `docker/metadata-action` for tags/labels, and caches via GHA cache.
+- Publishes to GHCR `ghcr.io/<owner>/<repo>`.
 
 ## Common tasks (examples)
 
