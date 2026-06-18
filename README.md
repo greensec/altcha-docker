@@ -54,6 +54,11 @@ The API service reads the following environment variables:
 - MAXNUMBER: ALTCHA v2 proof-of-work cost (difficulty), default 5000.
 - REDIS_URL (optional): Redis or Valkey URL for a shared replay-store backend. When set, the API uses Redis instead of the in-memory cache. Example: `redis://valkey:6379`.
 
+Docker Compose also reads the following image overrides:
+
+- `API_IMAGE` (optional): Image used for the server service. Default: `ghcr.io/greensec/altcha-docker:main`. Set this to use a custom build or a different tag.
+- `DEMO_IMAGE` (optional): Image used for the demo service. Default: `ghcr.io/greensec/altcha-docker-demo:main`.
+
 ### Generating a secret
 
 Generate a strong HMAC secret with at least 32 characters:

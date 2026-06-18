@@ -1,5 +1,6 @@
 services:
   server:
+    image: ${API_IMAGE:-ghcr.io/greensec/altcha-docker:main}
     build:
       context: .
       target: api
@@ -37,6 +38,7 @@ services:
   demo:
     profiles:
       - demo
+    image: ${DEMO_IMAGE:-ghcr.io/greensec/altcha-docker-demo:main}
     build:
       context: .
       target: demo
