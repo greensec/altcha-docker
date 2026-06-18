@@ -3,7 +3,9 @@ import dotenv from "dotenv";
 import { parseDemoConfig } from "./config";
 import { createDemoApp } from "./demo-app";
 
-dotenv.config();
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config();
+}
 
 const start = () => {
   const config = parseDemoConfig();

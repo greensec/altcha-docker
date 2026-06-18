@@ -3,6 +3,7 @@ import { deriveKey } from "altcha-lib/algorithms/pbkdf2";
 import { deriveHmacKeySecret, verify as verifyPayload } from "altcha-lib/frameworks/shared";
 import cors from "cors";
 import express, { type Express, type NextFunction, type Request, type RequestHandler, type Response } from "express";
+import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 
 import type { ApiConfig } from "./config";
@@ -33,7 +34,14 @@ export const createApiApp = async (config: ApiConfig): Promise<Express> => {
     res.sendStatus(204);
   });
 
-  app.get("/challenge", asyncHandler(async (_req: Request, res: Response) => {
+  const challengeRateLimit = rateLimit({
+    windowMs: 60 * 1000,
+    max: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  app.get("/challenge", challengeRateLimit, asyncHandler(async (_req: Request, res: Response) => {
     const challenge = await createChallenge({
       algorithm: config.algorithm,
       cost: config.maxNumber,

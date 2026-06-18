@@ -31,7 +31,7 @@ export const createDemoApp = (config: DemoConfig): Express => {
 
   app.get("/challenge", async (_req: Request, res: Response) => {
     try {
-      const upstream = await fetch(`${config.apiBaseUrl}/challenge`);
+      const upstream = await fetch(`${config.apiBaseUrl}/challenge`, { signal: AbortSignal.timeout(5000) });
       const body = Buffer.from(await upstream.arrayBuffer());
       const contentType = upstream.headers.get("content-type");
 
@@ -48,7 +48,7 @@ export const createDemoApp = (config: DemoConfig): Express => {
       const url = new URL("/verify", config.apiBaseUrl);
       if (typeof req.body.altcha === "string") url.searchParams.set("altcha", req.body.altcha);
 
-      const upstream = await fetch(url);
+      const upstream = await fetch(url, { signal: AbortSignal.timeout(5000) });
       res.sendStatus(proxyStatus(upstream.status, 417));
     } catch (error: unknown) {
       console.error("[ALTCHA]: demo verify proxy failed", error);
