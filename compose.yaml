@@ -7,7 +7,10 @@ services:
       SECRET: ${ALTCHA_SECRET:-$$ecret.key}
       NODE_ENV: production
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      EXPIREMINUTES: ${EXPIREMINUTES:-10}
+      MAXRECORDS: ${MAXRECORDS:-1000}
       MAXNUMBER: ${MAXNUMBER:-5000}
+      PORT: ${PORT:-3000}
     ports:
       - "3000:3000"
     restart: unless-stopped

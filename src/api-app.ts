@@ -26,6 +26,8 @@ export const createApiApp = async (config: ApiConfig): Promise<Express> => {
   const hmacKeySignatureSecret = await deriveHmacKeySecret(config.hmacKey);
   const replayStore = createInMemoryReplayStore(config.maxRecords);
 
+  console.log("[ALTCHA]: replay store initialised — in-memory, cleared on restart");
+
   app.use(helmet());
   app.use(express.json());
   app.use(cors({ origin: config.corsOrigin }));
@@ -65,8 +67,7 @@ export const createApiApp = async (config: ApiConfig): Promise<Express> => {
     res.status(200).json(challenge);
   }));
 
-  app.get("/verify", asyncHandler(async (req: Request, res: Response) => {
-    const payload = req.query.altcha;
+  const handleVerify = async (payload: unknown, res: Response) => {
     if (typeof payload !== "string" || !payload.length) {
       res.status(417).json({ error: "invalid" });
       return;
@@ -79,6 +80,14 @@ export const createApiApp = async (config: ApiConfig): Promise<Express> => {
     } else {
       res.sendStatus(202);
     }
+  };
+
+  app.get("/verify", asyncHandler(async (req: Request, res: Response) => {
+    await handleVerify(req.query.altcha, res);
+  }));
+
+  app.post("/verify", asyncHandler(async (req: Request, res: Response) => {
+    await handleVerify(req.body.altcha, res);
   }));
 
   return app;

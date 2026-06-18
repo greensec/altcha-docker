@@ -27,8 +27,6 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^22.15.0",
-    "@yarnpkg/pnpify": "^4.1.6",
-    "ts-node": "^10.9.2",
     "typescript": "^6.0.2"
   }
 }

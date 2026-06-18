@@ -107,9 +107,14 @@ MAXNUMBER=5000
   - 200 OK with challenge payload.
 
 - GET /verify?altcha=<payload>
-  - Verifies the provided ALTCHA solution.
+  - Verifies the provided ALTCHA solution via query string.
   - 202 Accepted on success.
   - 417 Expectation Failed on failure or when a token is reused (single-use enforced with an in-memory cache).
+
+- POST /verify
+  - Verifies the provided ALTCHA solution via JSON body (`{ "altcha": string }`).
+  - 202 Accepted on success.
+  - 417 Expectation Failed on failure or reuse.
 
 Notes:
 
@@ -169,7 +174,7 @@ bun run dev
 - Change `ALTCHA_SECRET` for Docker Compose, or `SECRET` for direct API/container runtime, to a strong unique value. Never use the default.
 - Do not bake `.env` files or secrets into images; provide runtime environment variables from Compose, your orchestrator, or a secret manager.
 - Consider terminating TLS in front of the container and restricting access to /verify if needed.
-- In-memory replay protection is single-instance only; for horizontal scaling, replace the in-memory token cache with a shared store.
+- **Warning:** In-memory replay protection is single-instance only and is cleared on every container restart. Any routine deploy or crash recovery silently opens a replay window for recently-issued challenges. For production, replace the in-memory token cache with a shared store (e.g., Redis) or pair with upstream protections.
 - Pin image versions and consider multi-arch builds if deploying across architectures.
 - Both the `api` and `demo` Dockerfile stages include a `HEALTHCHECK` for orchestrator-level health detection.
 - The API container handles `SIGTERM`/`SIGINT` gracefully, draining active connections before exit.
