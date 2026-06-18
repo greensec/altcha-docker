@@ -101,4 +101,63 @@ describe("createApiApp", () => {
     const body = await second.json();
     expect(body).toEqual({ error: "replayed" });
   });
+
+  test("POST /verify with valid payload returns 202", async () => {
+    const challengeRes = await fetch(`${baseUrl}/challenge`);
+    const challenge = await challengeRes.json();
+
+    const solution = await solveChallenge({
+      challenge,
+      deriveKey,
+    });
+    expect(solution).not.toBeNull();
+
+    const payload = btoa(JSON.stringify({ challenge, solution }));
+    const verifyRes = await fetch(`${baseUrl}/verify`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ altcha: payload }),
+    });
+    expect(verifyRes.status).toBe(202);
+  });
+
+  test("POST /verify with invalid payload returns 417 and error invalid", async () => {
+    const res = await fetch(`${baseUrl}/verify`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ altcha: "not-valid" }),
+    });
+    expect(res.status).toBe(417);
+    const body = await res.json();
+    expect(body).toEqual({ error: "invalid" });
+  });
+
+  test("POST /verify with replayed payload returns 417 and error replayed", async () => {
+    const challengeRes = await fetch(`${baseUrl}/challenge`);
+    const challenge = await challengeRes.json();
+
+    const solution = await solveChallenge({
+      challenge,
+      deriveKey,
+    });
+    expect(solution).not.toBeNull();
+
+    const payload = btoa(JSON.stringify({ challenge, solution }));
+
+    const first = await fetch(`${baseUrl}/verify`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ altcha: payload }),
+    });
+    expect(first.status).toBe(202);
+
+    const second = await fetch(`${baseUrl}/verify`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ altcha: payload }),
+    });
+    expect(second.status).toBe(417);
+    const body = await second.json();
+    expect(body).toEqual({ error: "replayed" });
+  });
 });

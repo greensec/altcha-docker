@@ -10,8 +10,6 @@ if (process.env.NODE_ENV !== "production") {
 const start = async () => {
   const config = parseApiConfig();
 
-  if (config.hmacKey === "$ecret.key") console.log(" [WARNING] CHANGE ALTCHA SECRET KEY - its still default !!! ");
-
   const app = await createApiApp(config);
 
   const server = app.listen(config.port, () => {
