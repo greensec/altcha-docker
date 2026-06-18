@@ -8,10 +8,10 @@ Run the split API and demo services together:
 docker compose up --build
 ```
 
-Override the Compose-managed API secret with `ALTCHA_SECRET`; Compose maps it to the API container's required `SECRET` runtime variable:
+Override the Compose-managed API secret with `ALTCHA_HMAC_SECRET`; Compose maps it to the API container's required `SECRET` runtime variable:
 
 ```bash
-ALTCHA_SECRET=change-me-to-a-long-random-string docker compose up --build
+ALTCHA_HMAC_SECRET=change-me-to-a-long-random-string docker compose up --build
 ```
 
 - API: http://localhost:3000
@@ -68,7 +68,7 @@ docker run --rm -p 8080:8080 \
 
 API settings:
 
-- `SECRET`: Required container/runtime HMAC key for ALTCHA challenge signing. Docker Compose sets it from `ALTCHA_SECRET`, falling back to `$ecret.key` for local testing only.
+- `SECRET`: Required container/runtime HMAC key for ALTCHA challenge signing. Docker Compose sets it from `ALTCHA_HMAC_SECRET`, falling back to `$ecret.key` for local testing only.
 - `PORT`: API port, default 3000.
 - `EXPIREMINUTES`: Challenge expiry in minutes, default 10.
 - `MAXRECORDS`: In-memory replay cache size, default 1000.
@@ -92,7 +92,7 @@ docker tag altcha-docker-demo myregistry.com/altcha-docker-demo:latest
 docker push myregistry.com/altcha-docker-demo:latest
 ```
 
-Do not bake `.env` files or secrets into Docker images. The Dockerfile does not copy `.env`; provide runtime configuration through Docker Compose `ALTCHA_SECRET`, `docker run -e SECRET=...`, your orchestrator, or a secret manager.
+Do not bake `.env` files or secrets into Docker images. The Dockerfile does not copy `.env`; provide runtime configuration through Docker Compose `ALTCHA_HMAC_SECRET`, `docker run -e SECRET=...`, your orchestrator, or a secret manager.
 
 If you scale the API beyond one instance, replace the in-memory replay cache with a shared store so token reuse checks are consistent across replicas.
 

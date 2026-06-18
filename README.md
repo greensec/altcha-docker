@@ -38,14 +38,14 @@ REDIS_URL=redis://valkey:6379 docker compose --profile redis up --build
 To override the secret temporarily:
 
 ```bash
-ALTCHA_SECRET="your-very-long-random-key" docker compose up --build
+ALTCHA_HMAC_SECRET="your-very-long-random-key" docker compose up --build
 ```
 
 ## Configuration
 
 The API service reads the following environment variables:
 
-- SECRET (required): HMAC key used to sign/verify challenges. The API app requires this container/runtime value. Docker Compose maps `ALTCHA_SECRET` to container `SECRET` and supplies `$ecret.key` only as a local testing fallback when `ALTCHA_SECRET` is unset; don’t use it in production.
+- SECRET (required): HMAC key used to sign/verify challenges. The API app requires this container/runtime value. Docker Compose maps `ALTCHA_HMAC_SECRET` to container `SECRET` and supplies `$ecret.key` only as a local testing fallback when `ALTCHA_HMAC_SECRET` is unset; don’t use it in production.
 - PORT: API port, default 3000.
 - EXPIREMINUTES: Challenge expiry in minutes, default 10.
 - MAXRECORDS: Size of in‑memory single‑use token cache, default 1000.
@@ -53,6 +53,20 @@ The API service reads the following environment variables:
 - ALGORITHM: ALTCHA v2 algorithm, default PBKDF2/SHA-256.
 - MAXNUMBER: ALTCHA v2 proof-of-work cost (difficulty), default 5000.
 - REDIS_URL (optional): Redis or Valkey URL for a shared replay-store backend. When set, the API uses Redis instead of the in-memory cache. Example: `redis://valkey:6379`.
+
+### Generating a secret
+
+Generate a strong HMAC secret with at least 32 characters:
+
+```bash
+# Linux / macOS (OpenSSL)
+openssl rand -base64 48
+
+# Or with /dev/urandom
+tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 48; echo
+```
+
+Copy the output into `.env` as `ALTCHA_HMAC_SECRET` (or `SECRET` for direct Bun runs).
 
 The demo service reads the following environment variables:
 
@@ -68,7 +82,7 @@ You can provide variables via:
 Example .env:
 
 ```env
-ALTCHA_SECRET=change-me-to-a-long-random-string
+ALTCHA_HMAC_SECRET=change-me-to-a-long-random-string
 # Direct Bun/API runtime only:
 SECRET=change-me-to-a-long-random-string
 PORT=3000
@@ -178,7 +192,7 @@ bun run dev
 
 ## Production notes
 
-- Change `ALTCHA_SECRET` for Docker Compose, or `SECRET` for direct API/container runtime, to a strong unique value. Never use the default.
+- Change `ALTCHA_HMAC_SECRET` for Docker Compose, or `SECRET` for direct API/container runtime, to a strong unique value. Never use the default.
 - Do not bake `.env` files or secrets into images; provide runtime environment variables from Compose, your orchestrator, or a secret manager.
 - Consider terminating TLS in front of the container and restricting access to /verify if needed.
 - **Warning:** In-memory replay protection is single-instance only and is cleared on every container restart. Any routine deploy or crash recovery silently opens a replay window for recently-issued challenges. For production, set `REDIS_URL` to use a shared Redis or Valkey backend, or pair with upstream protections.
