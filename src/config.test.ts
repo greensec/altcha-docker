@@ -15,6 +15,7 @@ describe("parseApiConfig", () => {
       maxNumber: 5000,
       maxRecords: 1000,
       port: 3000,
+      redisUrl: undefined,
     });
   });
 
@@ -63,6 +64,16 @@ describe("parseApiConfig", () => {
     expect(() => parseApiConfig({ SECRET: LONG_SECRET, ALGORITHM: "SHA-256" })).toThrow(
       "ALGORITHM must be one of: PBKDF2/SHA-256, PBKDF2/SHA-384, PBKDF2/SHA-512"
     );
+  });
+
+  test("parses REDIS_URL when present", () => {
+    const config = parseApiConfig({ SECRET: LONG_SECRET, REDIS_URL: "redis://localhost:6379" });
+    expect(config.redisUrl).toBe("redis://localhost:6379");
+  });
+
+  test("omits redisUrl when REDIS_URL is absent", () => {
+    const config = parseApiConfig({ SECRET: LONG_SECRET });
+    expect(config.redisUrl).toBeUndefined();
   });
 
   test("accepts all supported algorithms", () => {

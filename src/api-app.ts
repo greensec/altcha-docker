@@ -7,7 +7,7 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 
 import type { ApiConfig } from "./config";
-import { createInMemoryReplayStore } from "./replay-store";
+import { createInMemoryReplayStore, createRedisReplayStore } from "./replay-store";
 
 const addMinutesToDate = (date: Date, n: number) => {
   const d = new Date(date);
@@ -24,9 +24,20 @@ const asyncHandler = (handler: RequestHandler): RequestHandler => {
 export const createApiApp = async (config: ApiConfig): Promise<Express> => {
   const app: Express = express();
   const hmacKeySignatureSecret = await deriveHmacKeySecret(config.hmacKey);
-  const replayStore = createInMemoryReplayStore(config.maxRecords);
 
-  console.log("[ALTCHA]: replay store initialised — in-memory, cleared on restart");
+  const replayStore = config.redisUrl
+    ? await (async () => {
+        const store = createRedisReplayStore(config.redisUrl!, config.expireMinutes * 60);
+        await store.get("__connection_check__");
+        return store;
+      })()
+    : createInMemoryReplayStore(config.maxRecords);
+
+  console.log(
+    config.redisUrl
+      ? "[ALTCHA]: replay store initialised — redis"
+      : "[ALTCHA]: replay store initialised — in-memory, cleared on restart"
+  );
 
   app.use(helmet());
   app.use(express.json());

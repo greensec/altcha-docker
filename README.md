@@ -29,6 +29,12 @@ docker compose --profile demo up --build
 
 - Demo: http://localhost:8080
 
+To start the API with a Valkey-backed replay store, add the `redis` profile and set `REDIS_URL`:
+
+```bash
+REDIS_URL=redis://valkey:6379 docker compose --profile redis up --build
+```
+
 To override the secret temporarily:
 
 ```bash
@@ -46,6 +52,7 @@ The API service reads the following environment variables:
 - CORS_ORIGIN: Allowed CORS origin(s), default *. Use comma-separated values for multiple origins.
 - ALGORITHM: ALTCHA v2 algorithm, default PBKDF2/SHA-256.
 - MAXNUMBER: ALTCHA v2 proof-of-work cost (difficulty), default 5000.
+- REDIS_URL (optional): Redis or Valkey URL for a shared replay-store backend. When set, the API uses Redis instead of the in-memory cache. Example: `redis://valkey:6379`.
 
 The demo service reads the following environment variables:
 
@@ -174,7 +181,7 @@ bun run dev
 - Change `ALTCHA_SECRET` for Docker Compose, or `SECRET` for direct API/container runtime, to a strong unique value. Never use the default.
 - Do not bake `.env` files or secrets into images; provide runtime environment variables from Compose, your orchestrator, or a secret manager.
 - Consider terminating TLS in front of the container and restricting access to /verify if needed.
-- **Warning:** In-memory replay protection is single-instance only and is cleared on every container restart. Any routine deploy or crash recovery silently opens a replay window for recently-issued challenges. For production, replace the in-memory token cache with a shared store (e.g., Redis) or pair with upstream protections.
+- **Warning:** In-memory replay protection is single-instance only and is cleared on every container restart. Any routine deploy or crash recovery silently opens a replay window for recently-issued challenges. For production, set `REDIS_URL` to use a shared Redis or Valkey backend, or pair with upstream protections.
 - Pin image versions and consider multi-arch builds if deploying across architectures.
 - Both the `api` and `demo` Dockerfile stages include a `HEALTHCHECK` for orchestrator-level health detection.
 - The API container handles `SIGTERM`/`SIGINT` gracefully, draining active connections before exit.
