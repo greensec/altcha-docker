@@ -30,6 +30,17 @@ export const createApiApp = async (config: ApiConfig): Promise<Express> => {
   app.use(express.json());
   app.use(cors({ origin: config.corsOrigin }));
 
+  if (process.env.NODE_ENV !== "test") {
+    app.use((req: Request, res: Response, next: NextFunction) => {
+      const start = Date.now();
+      res.on("finish", () => {
+        const duration = Date.now() - start;
+        console.log(`${req.method} ${req.path} ${res.statusCode} ${duration}ms`);
+      });
+      next();
+    });
+  }
+
   app.get("/", (_req: Request, res: Response) => {
     res.sendStatus(204);
   });
@@ -57,12 +68,17 @@ export const createApiApp = async (config: ApiConfig): Promise<Express> => {
   app.get("/verify", asyncHandler(async (req: Request, res: Response) => {
     const payload = req.query.altcha;
     if (typeof payload !== "string" || !payload.length) {
-      res.sendStatus(417);
+      res.status(417).json({ error: "invalid" });
       return;
     }
 
     const result = await verifyPayload(payload, deriveKey, config.hmacKey, hmacKeySignatureSecret, replayStore);
-    res.sendStatus(result.error ? 417 : 202);
+    if (result.error) {
+      const error = result.error === "ALTCHA payload has been already used." ? "replayed" : "invalid";
+      res.status(417).json({ error });
+    } else {
+      res.sendStatus(202);
+    }
   }));
 
   return app;

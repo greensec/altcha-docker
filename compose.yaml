@@ -10,8 +10,16 @@ services:
       MAXNUMBER: ${MAXNUMBER:-5000}
     ports:
       - "3000:3000"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
 
   demo:
+    profiles:
+      - demo
     build:
       context: .
       target: demo
@@ -22,3 +30,9 @@ services:
       - server
     ports:
       - "8080:8080"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M

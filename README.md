@@ -15,11 +15,18 @@ Use Docker Compose (recommended):
 ```bash
 # Optionally create a .env file (see below) or set variables in your shell
 [ -f .env ] || cp .env.example .env
-# Start the stack
+# Start the API only (production default)
 docker compose up --build
 ```
 
 - API: http://localhost:3000
+
+To also start the demo service, add the `demo` profile:
+
+```bash
+docker compose --profile demo up --build
+```
+
 - Demo: http://localhost:8080
 
 To override the secret temporarily:

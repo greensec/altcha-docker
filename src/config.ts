@@ -1,7 +1,9 @@
 export type CorsOrigin = "*" | string[];
 
+export type SupportedAlgorithm = "PBKDF2/SHA-256" | "PBKDF2/SHA-384" | "PBKDF2/SHA-512";
+
 export type ApiConfig = {
-  algorithm: string;
+  algorithm: SupportedAlgorithm;
   corsOrigin: CorsOrigin;
   expireMinutes: number;
   hmacKey: string;
@@ -46,14 +48,29 @@ const parseUrl = (value: string, name: string): string => {
   }
 };
 
+const SUPPORTED_ALGORITHMS: SupportedAlgorithm[] = [
+  "PBKDF2/SHA-256",
+  "PBKDF2/SHA-384",
+  "PBKDF2/SHA-512",
+];
+
+const parseAlgorithm = (value: string | undefined): SupportedAlgorithm => {
+  const algorithm = (value || "PBKDF2/SHA-256").trim() as SupportedAlgorithm;
+  if (!SUPPORTED_ALGORITHMS.includes(algorithm)) {
+    throw new Error(`ALGORITHM must be one of: ${SUPPORTED_ALGORITHMS.join(", ")}`);
+  }
+  return algorithm;
+};
+
 export const parseApiConfig = (env: Env = process.env): ApiConfig => {
   const hmacKey = env.SECRET?.trim();
   if (!hmacKey) throw new Error("SECRET is required");
+  if (hmacKey.length < 32) throw new Error("SECRET must be at least 32 characters");
 
   const maxNumberSource = env.MAXNUMBER === undefined || env.MAXNUMBER.trim() === "" ? "COST" : "MAXNUMBER";
 
   return {
-    algorithm: env.ALGORITHM?.trim() || "PBKDF2/SHA-256",
+    algorithm: parseAlgorithm(env.ALGORITHM),
     corsOrigin: parseCorsOrigin(env.CORS_ORIGIN),
     expireMinutes: parsePositiveInteger(env, "EXPIREMINUTES", 10),
     hmacKey,
